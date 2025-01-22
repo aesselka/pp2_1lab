@@ -5,15 +5,15 @@ print(thisset)
 thisset1 = {"apple", "banana", "cherry"}
 print("banana" in thisset1) #true
 #Добавить элементы набора
-#update() добавить элементы из другого набора в текущий набор на рандом
+    #update() добавить элементы из другого набора в текущий набор на рандом
 thisset3 = {"apple", "banana", "cherry"}
 tropical = {"pineapple", "mango", "papaya"}
 thisset3.update(tropical)
 print(thisset3)
 #Удалить элементы набора
-#удалить элемент из набора, используйте метод remove(), или discard()
-#случайный элемент, используя pop()
-#clear() очищает весь набор
+    #удалить элемент из набора, используйте метод remove(), или discard()
+    #случайный элемент, используя pop()
+    #clear() очищает весь набор
 thisset4 = {"apple", "banana", "cherry"}
 thisset4.discard("banana")
 print(thisset4)
