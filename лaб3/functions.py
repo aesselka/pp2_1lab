@@ -90,3 +90,27 @@ def pl(str):
     if rev==str:
         return True
     return False
+#12 histogram
+def his(lis):
+    for i in lis:
+        print(i*'*')
+#13 guess the number
+import random 
+def game():
+    guessnum=random.randint(1,25)
+    print("Hello! What is your name?")
+    name=input()
+    print("Well, " ,name ,", I am thinking of a number between 1 and 20.")
+    print("Take a guess")
+    coun=0
+    while True:
+        num=int(input())
+        if num<guessnum:
+            print("Your guess is too low.")
+            coun+=1
+        elif num>guessnum:
+            print("Your guess is too high.")
+            coun+=1
+        elif num==guessnum:
+            print("Good job, KBTU! You guessed my number in", coun ," guesses!")
+
