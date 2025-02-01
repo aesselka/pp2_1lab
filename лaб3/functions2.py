@@ -77,4 +77,47 @@ movies = [
 "category": "Romance"
 }
 ]
-#1 Write a function that takes a single movie and returns True if its IMDB score is above 5.5
+#1 
+def reit(movies):
+    if movies["imdb"]>5.5:
+        return True
+    return False
+print(reit(movies[4]))
+#2 
+def pup(movies):
+    for i in movies:
+        high=[]
+        if i["imdb"]>5.5:
+         high.append(i)
+         return high
+print(pup(movies),'\n' )
+#3
+def categorys(category):
+   inf=[]
+   for i in movies:
+      if i["category"]== category:
+        inf.append(i["name"])
+        return inf
+print(categorys("Adventure"))
+#4 
+def avr():
+   lirt=[]
+   avg=0
+   coun=0
+   for i in movies:
+      avg+=i["imdb"]
+      coun+=1
+      result=avg/coun
+      return result
+print(avr())
+#5
+def catavr(category):
+   avg=0
+   coun=0
+   for i in movies:
+      if i["category"]==category:
+         avg+=i["imdb"]
+         coun+=1
+         res=avg/coun
+         return res
+print(catavr("Romance"))
