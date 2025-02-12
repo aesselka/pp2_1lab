@@ -34,7 +34,7 @@ list5.pop(2)
 print(list5)
 thislist4 = ["apple", "banana", "cherry"]
 del thislist4 # может удалить весь список
-thislist4.clear() #clear() очищает список но сохраняет выдает пустой
+#thislist4.clear() #clear() очищает список но сохраняет выдает пустой
 #Циклические списки
 d=["pop","kitty","rare"]
 for i in d:

@@ -20,8 +20,8 @@ import math
 class Myhouse():
     def __init__(self):
         self.numofhouse=""
-    def getString(self):
-        self.numofhouse=input("write a что то: ")
+    def getString(self):0
+    self.numofhouse=input("write a что то: ")
     def printtString(self):
         print(self.numofhouse.upper())
 House= Myhouse()
@@ -35,7 +35,7 @@ class Square(Shape):
     def __init__(self,dlinna):
         super().__init__()
         self.dlinna=dlinna
-    def area(self):
+    def area(self):    
         return self.dlinna*self.dlinna
 Sq=Square(5)
 print(Sq.area())
@@ -82,8 +82,6 @@ class Bank():
 acc=Bank("Assel", 1000)
 acc.deposit(500)
 acc.withdraw(300)
-acc.withdraw(1500)  
-acc.withdraw(700)
 #6
 def prime(n):
     if n<2:

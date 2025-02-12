@@ -28,7 +28,7 @@ age = 17
 txt = f"My name is Assel, I am {age}"
 print(txt)
 #Python - Экранированные символы
-txt2 = "We study  \"PP\" from the first semester."
+txt2 = "We study  \"PP\" in the first semester."
 #Python — Строковые методы
 cp="hello everyone!"
 print(cp.capitalize())

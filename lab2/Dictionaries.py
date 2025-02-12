@@ -27,7 +27,7 @@ thisdict1.update({"year": 2020})
 #удаление элементов словарz
 thisdict1.pop("model")        #pop()удаляет элемент с указанным именем ключа:
 thisdict.popitem()        #popitem()удаляет последний вставленный элемент
-del thisdict["model"]        #delслово удаляет элемент с указанным именем ключа
+del thisdict["model"]        #del слово удаляет элемент с указанным именем ключа
 #Циклические словари
 for x in thisdict:
   print(thisdict[x])

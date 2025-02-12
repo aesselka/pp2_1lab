@@ -9,14 +9,14 @@ def faren(fr):
     c=(5/9)*(fr-32)
     return c
 print(faren(int(input())))
-#3. We count 35 heads and 94 legs among the chickens and rabbits
+#3. 
 def count(heads,legs):
     rab=(legs-2*heads)//2
     chickens=heads-rab
     return rab,chickens
 rab,chickens=count(35,94)
 print(rab,chickens, sep=" , ")
-#4. Write a function filter_prime which will take list of
+#4.
 def prime(n):
     if n < 2:  
         return False
@@ -40,7 +40,7 @@ def filter_prime(numbers):
 numbers = list(map(int, input().split()))
 primes = filter_prime(numbers)
 print( *primes) 
-#5. Write a function that accepts string from user and print all permutations of that string
+#5. 
 def st(s):
     if len(s)==1:
         return s
@@ -50,19 +50,19 @@ def st(s):
             new.append(s[i]+j)
     return new
 print(*st(input()), sep=" , ")
-#6. Write a function that accepts string from user, return a sentence with the words reversed. We are ready -> ready are We
+#6. 
 def sy():
     sentence=input()
     word = sentence.split()
     return word[::-1]
 print(*sy()) 
-#7 Given a list of ints, return True if the array contains a 3 next to a 3 somewhere.
+#7 
 def rt(lew = []):
     for i in range(0,len(lew)):
         if ((lew[i]==3) and lew[i+1]==3):
             return True
     return False
-#8 Write a function that takes in a list of integers and returns True if it contains 007 in order
+#8 
 def gh(large=[]):
     cout=0
     for i in range(0,len(large)):
@@ -71,12 +71,11 @@ def gh(large=[]):
         elif ((large[i]==7)and cout==2):
             return True 
     return False
-#9 Write a function that computes the volume of a sphere given its radius.
+#9 
 def volume(r):
     pi=3.14
     return (4/3)*(pi)*(r**3)
-#10 Write a Python function that takes a list and returns a new list with unique elements of the first list. Note: don't use collection set.
-
+#10 
 def uset(lst):
     lst.sort
     ulst = []
@@ -113,4 +112,3 @@ def game():
             coun+=1
         elif num==guessnum:
             print("Good job, KBTU! You guessed my number in", coun ," guesses!")
-
