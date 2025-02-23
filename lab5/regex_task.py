@@ -37,7 +37,18 @@ text2="После того как Анел закончила занятия в 
 replacement=':'
 new=re.sub(reg, replacement, text2)
 print(new)
+#7
+txt="This is a sample text with some patterns like first_name"
+pattern = re.findall(r'[A-Za-z]+_[A-Za-z]+', txt)
+cc = []
+for i in pattern:
+    a = i.split('_')
+    cc.append(a[0]+''.join(x.capitalize() for x in a[1:]))
+print(cc)
 #8
 text="JackDesk"
 mkf=(re.sub(r'([a-z])([A-Z])', r'\1 \2', text))
 print(mkf)
+#9
+pattern = re.sub(r'(?<!^)(?=[A-Z])', ' ', txt)
+print(pattern)
