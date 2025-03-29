@@ -150,13 +150,16 @@ while True:
         pygame.quit()
         sys.exit()
     
-    message("Score: " + str(coins_num), WHITE, 30, 10)
-    pygame.display.update()
-    fps.tick(100)
+    # message("Score: " + str(coins_num), WHITE, 30, 10)
+    # pygame.display.update()
+    # fps.tick(100)
 
     screen.fill((0, 0, 0))  
     screen.blit(racer_back, (0, 0))  
     all_sprites.draw(screen) 
 
+    message("Score: " + str(coins_num), WHITE, 30, 10)
     pygame.display.update()
-    fps.tick(100) 
+
+    pygame.display.update()
+    fps.tick(60) 
