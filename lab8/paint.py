@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 objects = []
 draw_circle_mod = False
 draw_rect_mod = True
-draw_erase_mode = False  # Сначала режим стирания выключен
+draw_erase_mode = False  
 colors = [
     pygame.Color('white'),   
     pygame.Color('red'),     
@@ -155,6 +155,6 @@ while True:
         bord_col = colors[0]
         cur_col = colors[5] # use black for eraser
 
-    screen.blit(collist, (600, -2))
+    screen.blit(collist, (600, 0))
     clock.tick(200)
     pygame.display.update()

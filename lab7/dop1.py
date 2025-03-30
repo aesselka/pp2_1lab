@@ -12,9 +12,8 @@ clock=pygame.time.Clock()
 radius=25
 x=height//2
 y=height//2
-speedb=20
 fps=60
-
+speedb=20
 done=False
 while not done:
     for event in pygame.event.get():
@@ -28,13 +27,21 @@ while not done:
     
     
     key=pygame.key.get_pressed()
-    if key[pygame.K_UP] and y - radius - speedb >= 0:
+    if key[pygame.K_UP]:
         y-=speedb
-    if key[pygame.K_DOWN] and y + radius + speedb <= height:
+    if key[pygame.K_DOWN]:
         y+=speedb
-    if key[pygame.K_RIGHT] and x+radius+speedb<=width:
+    if key[pygame.K_RIGHT]:
         x+=speedb
-    if key[pygame.K_LEFT] and x-radius-speedb>=0:
+    if key[pygame.K_LEFT]:
         x-=speedb
+    if x<radius:
+        x=radius
+    if x>width-radius:
+        x=width-radius
+    if y<radius:
+        y=radius
+    if y>height-radius:
+        y=height-radius
     clock.tick(fps)
 pygame.quit()
