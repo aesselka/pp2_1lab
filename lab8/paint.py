@@ -1,117 +1,160 @@
-import pygame
-import time
+import pygame 
 import sys
 
 pygame.init()
 
-# Настройки экрана
-width,heigth=600,600
-screen=pygame.display.set_mode((width,heigth))
-pygame.display.set_caption("Paint")
-clock=pygame.time.Clock()
-er=pygame.image.load('eraser.jpg')
-er_img=pygame.transform.scale(er, (50,50))
-white=(255,255,255)
-black=(0,0,0)
-green=(0,255,0)
-red=(255,0,0)
-blue=(0,0,255)
-colors=[red,green,blue,black]
+W, H = 800,600
+b_size = 1
 
-brush_size=5
-drawing=False
-cr_tool='circle'
-cr_color=black
-tools=["circle","line","rect","eraser"]
-font_style = pygame.font.SysFont("Times New Roman", 25)
+collist = pygame.image.load('pp.png')
+collist = pygame.transform.scale(collist, (200, 600))
+clock = pygame.time.Clock()
 
-#draw circle
-def draw_circle(x,y):
-    pygame.draw.circle(screen, cr_color,(x,y), brush_size)
+objects = []
+draw_circle_mod = False
+draw_rect_mod = True
+draw_erase_mode = False  # Сначала режим стирания выключен
+colors = [
+    pygame.Color('white'),   
+    pygame.Color('red'),     
+    pygame.Color('blue'),    
+    pygame.Color('green'),   
+    pygame.Color('yellow'),  
+    pygame.Color('black')    # Background color (black)
+]
 
-#draw rect
-def draw_rect(x,y):
-    pygame.draw.rect(screen,cr_color, (x-brush_size,y-brush_size), brush_size)
+risuiu = False
 
-#draw line
-def draw_line(x,y,start_pos):
-    pygame.draw.line(screen, cr_color,start_pos, (x,y), brush_size)
+cur_col = colors[0]  # start with white
+bord_col = colors[5]  # background color black
 
-def main():
-    global drawing, cr_tool, cr_color, brush_size
-    start_pos=None
-    while True:
-        #draw panel instrumentov
-        pygame.draw.rect(screen, black, (width - 160, 0, 160, heigth))
-        pygame.draw.rect(screen, white, (width - 160, 0, 160, 50))  # panel 
-        pygame.draw.rect(screen, white, (width - 160, 50, 160, 50))  # setevaya panel
+screen = pygame.display.set_mode((W, H))
 
-        # draw button
-        pygame.draw.circle(screen, red, (width - 130, 25), 15)
-        pygame.draw.rect(screen, green, (width - 100, 10, 30, 30))
-        pygame.draw.line(screen, blue, (width - 60, 10), (width - 60, 40), 3)
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
 
-        # panel choose color
-        pygame.draw.rect(screen, red, (width - 130, 55, 30, 30))
-        pygame.draw.rect(screen, green, (width - 100, 55, 30, 30))
-        pygame.draw.rect(screen, blue, (width - 70, 55, 30, 30))
-        pygame.draw.rect(screen, black, (width - 40, 55, 30, 30))
+    pressed = pygame.key.get_pressed()
+    curssor = pygame.mouse.get_pos()
+    cursor = pygame.mouse.get_pressed()
+    screen.fill(colors[5])  # Очистка экрана, черный фон
+
+    for obj in objects:
+        if obj[0] == "rect":
+            _, pos, w, h, color, size = obj
+            pygame.draw.rect(screen, color, (pos[0], pos[1], w, h), size)
+        elif obj[0] == "circle":
+            _, center, radius, color, size = obj
+            pygame.draw.circle(screen, color, center, radius, size)
+        elif obj[0] == "erase":
+            _, pos, size = obj
+            pygame.draw.circle(screen, colors[5], pos, size)
+
+    # draw mode rychag
+    if pressed[pygame.K_o]:
+        draw_circle_mod = True
+        draw_rect_mod = False
+        draw_erase_mode = False
+    if pressed[pygame.K_r]:
+        draw_circle_mod = False
+        draw_rect_mod = True
+        draw_erase_mode = False
+
+    # retrangle drawing
+    if draw_rect_mod:
+        if cursor[0] and not risuiu:
+            risuiu = True
+            start_pos = curssor
+        elif not cursor[0] and risuiu:
+            end_pos = curssor
+            x1, y1 = start_pos
+            x2, y2 = end_pos
+
+            left = min(x1, x2)
+            top = min(y1, y2)
+            width = abs(x2 - x1)
+            height = abs(y2 - y1)
+
+            objects.append(("rect", (left, top), width, height, cur_col, b_size))
+            risuiu = False
+
+        if risuiu:
+            x1, y1 = start_pos
+            x2, y2 = curssor
+            left = min(x1, x2)
+            top = min(y1, y2)
+            width = abs(x2 - x1)
+            height = abs(y2 - y1)
+            pygame.draw.rect(screen, cur_col, (left, top, width, height), b_size)
+
+    # drawing circle 
+    if draw_circle_mod:
+        if cursor[0] and not risuiu:
+            risuiu = True
+            start_pos = curssor
+        elif not cursor[0] and risuiu:
+            x1, y1 = start_pos
+            x2, y2 = curssor
+            left = min(x1, x2)
+            top = min(y1, y2)
+            width = abs(x2 - x1)
+            height = abs(y2 - y1)
+            center = (left + width // 2, top + height // 2)
+            radius = max(width, height) // 2
+            pygame.draw.circle(screen, cur_col, center, radius, b_size)
+
+            objects.append(("circle", center, radius, cur_col, b_size))
+            risuiu = False
+
+        if risuiu:
+            x1, y1 = start_pos
+            x2, y2 = curssor
+            left = min(x1, x2)
+            top = min(y1, y2)
+            width = abs(x2 - x1)
+            height = abs(y2 - y1)
+            center = (left + width // 2, top + height // 2)
+            radius = max(width, height) // 2
+            pygame.draw.circle(screen, cur_col, center, radius, b_size)
+
+    # eraser mode
+    if draw_erase_mode:
+        if cursor[0]:  # if pressed key 0
+            pygame.draw.circle(screen, colors[5], curssor, b_size)  # eraser circle
+            objects.append(("erase", curssor, b_size))
+
+    if pressed[pygame.K_UP] and b_size < 100:
+        b_size += 1
         
-        #current tool
-        text=font_style.render(f"tool: {cr_tool}", True,black)
-        #draw
+    if pressed[pygame.K_DOWN] and b_size > 1:
+        b_size -= 1
 
-        for event in pygame.event.get():
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+    # draw the curssor
+    pygame.draw.circle(screen, bord_col, curssor, b_size + 2)
+    pygame.draw.circle(screen, cur_col, curssor, b_size)
 
-            #nazhatii mishy
+    # Key mappings for color change
+    if pressed[pygame.K_a]:
+        cur_col = colors[0]  # W
+    if pressed[pygame.K_b]:
+        cur_col = colors[1]  # R
+    if pressed[pygame.K_c]:
+        cur_col = colors[2]  # B
+    if pressed[pygame.K_d]:
+        cur_col = colors[3]  # G
+    if pressed[pygame.K_e]:
+        cur_col = colors[4]  # Y
 
-            if event.type==pygame.MOUSEBUTTONDOWN:
-                drawing=True
-                start_pos=pygame.mouse.get_pos()
-            if event.type == pygame.MOUSEBUTTONUP:
-                drawing=False
-                start_pos=None
+    # perekluchenya na rezhim ctiranya (0)
+    if pressed[pygame.K_0]:
+        draw_erase_mode = True
+        draw_circle_mod = False
+        draw_rect_mod = False
+        bord_col = colors[0]
+        cur_col = colors[5] # use black for eraser
 
-            #vybor instumentov and color
-            if event.type==pygame.MOUSEBUTTONDOWN:
-                mouse_pos=pygame.mouse.get_pos()
-
-                #choose tools
-                if width- 160 <= mouse_pos[0] <= width - 130 and 0 <= mouse_pos[1] <= 50:
-                    cr_tool = "circle"
-                elif width - 130 <= mouse_pos[0] <= width - 100 and 0 <= mouse_pos[1] <= 50:
-                    cr_tool = "rect"
-                elif width - 100 <= mouse_pos[0] <= width - 70 and 0 <= mouse_pos[1] <= 50:
-                    cr_tool = "line"
-                elif width - 70 <= mouse_pos[0] <= width - 40 and 0 <= mouse_pos[1] <= 50:
-                    cr_tool = "eraser"
-
-                #choose colors
-                if width - 130 <= mouse_pos[0] <= width - 100 and 55 <= mouse_pos[1] <= 85:
-                    cr_color = red
-                elif width - 100 <= mouse_pos[0] <= width - 70 and 55 <= mouse_pos[1] <= 85:
-                    cr_color = green
-                elif width - 70 <= mouse_pos[0] <= width - 40 and 55 <= mouse_pos[1] <= 85:
-                    cr_color = blue
-                elif width - 40 <= mouse_pos[0] <= width - 10 and 55 <= mouse_pos[1] <= 85:
-                    cr_color = black
-
-
-        if drawing:
-            mouse_pos=pygame.mouse.get_pos()
-            if cr_tool== "circle":
-                draw_circle(mouse_pos[0], mouse_pos[1])
-            elif cr_tool=="rect":
-                draw_rect(mouse_pos[0], mouse_pos[1])
-            elif cr_tool=="line":
-                draw_line(mouse_pos[0],mouse_pos[1],start_pos)
-            elif cr_tool=="eraser":
-                pygame.draw.circle(screen,white, mouse_pos,brush_size)
-            
-
-        pygame.display.update()
-        clock.tick(60)
-main()
+    screen.blit(collist, (600, -2))
+    clock.tick(200)
+    pygame.display.update()

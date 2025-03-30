@@ -9,7 +9,7 @@ screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Racer Game")
 road = pygame.image.load('road.jpg')
 racer_back = pygame.transform.scale(road, (width, height))
-fps = pygame.time.Clock()
+fps = pygame.time.Clock()#chastota kadrov
 
 crash_music = pygame.mixer.Sound('crash.wav')
 wi_img = pygame.image.load('win.jpg')
@@ -24,19 +24,19 @@ enemy_speed = 6
 coin_speed = 3
 coins_num = 0
 target_coins =5
-
-
+#dlya monet
 class Coins(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = coins_img
+        self.image = coins_img#prisvaem monety
         self.rect = self.image.get_rect()
-        self.rect.center = (random.randint(100, 500),random.randint(-100,-20))
+        self.rect.center = (random.randint(100, 500),random.randint(-100,-20))#first position for moneta
 
     def move(self):
-        self.rect.move_ip(0, coin_speed)
+        self.rect.move_ip(0, coin_speed)#move moneta po y axis
         if self.rect.top > height:
             self.rect.center = (random.randint(100, 500), random.randint(-100,-20))
+#CLASS FOR ENEMY
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -48,6 +48,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.move_ip(0, enemy_speed)
         if self.rect.top > height:
             self.rect.center = (random.randint(100, 500), -20)
+#class for player
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -68,18 +69,18 @@ class Player(pygame.sprite.Sprite):
 
 Player1 = Player()
 Enemy1 = Enemy()
-
+#group of sprite to make easy to uplavliyat
 coins = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 
-all_sprites.add(Player1)
+all_sprites.add(Player1) #ADD PLAYERS IN GROUP OF SPRITE
 all_sprites.add(Enemy1)
 
 coin = Coins()
 coins.add(coin)
 all_sprites.add(coin)
-
+#ustanovka taimera dlya increase speed
 inc_speed = pygame.USEREVENT + 1
 pygame.time.set_timer(inc_speed, 1000)
 
@@ -89,7 +90,7 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == inc_speed:
+        if event.type == inc_speed:#increase speed every second
             enemy_speed += 1
             coin_speed += 1
             player_speed+=1
@@ -99,7 +100,7 @@ while True:
 
     for coin in coins:
         coin.move()
-
+#check stolknovenya player with enemy
     if pygame.sprite.collide_rect(Player1, Enemy1):
         crash_music.play()
         font = pygame.font.SysFont(None, 75)
@@ -111,7 +112,7 @@ while True:
         pygame.quit()
         sys.exit()
 
-
+#proverka sbora monet
     collected_coins = pygame.sprite.spritecollide(Player1, coins, True)
 
     if collected_coins:
@@ -120,7 +121,7 @@ while True:
         all_sprites.add(new_coin)
 
 
-    coins_num += len(collected_coins)
+    coins_num += len(collected_coins) #uvelichivaem schet
 
     if coins_num >= target_coins:
         screen.blit(win_img, (50,150))
