@@ -4,13 +4,12 @@ import time
 import sys
 import psycopg2
 pygame.init()
-sdata=psycopg2.connect(
-    dbname="snake_db",
-    user="postgres",
-    password="12345678",
-    host="localhost"
-)
+sdata=psycopg2.connect(host="localhost", dbname="snake_db" , user="postgres" ,password="12345678" , port=5433)
+
 sdb=sdata.cursor()
+
+
+sdata.commit()
 def customer(username):
     sdb.execute("SELECT id FROM users WHERE username=%s", (username,))
     user=sdb.fetchone()#возвращает одну строку результата последнего SQL-запроса.
@@ -35,6 +34,24 @@ def speed_current(user_id):
 def save_prog(user_id, level, score, speed):
     sdb.execute("INSERT INTO user_score (user_id, level, score, speed) VALUES (%s, %s, %s, %s)", (user_id, level, score, speed))
     sdata.commit()
+def save_score(username, score):
+    
+        # Получаем текущий счёт игрока из базы данных
+        sdb.execute("SELECT score FROM user_score WHERE name = %s", (username,))
+        result = sdb.fetchone()  # Возвращает кортеж (score,) или None
+
+        if result is None:
+            # Если игрока нет в базе данных, добавляем нового
+            sdb.execute("INSERT INTO snake (name, score) VALUES (%s, %s)", (username, score))
+        else:
+            # Если игрок существует, проверяем его текущий счёт
+            current_score = result[0]  # Извлекаем счёт из кортежа
+            if score > current_score:
+                # Обновляем счёт только если новый больше текущего
+                sdb.execute("UPDATE snake SET score = %s WHERE name = %s", (score, username))
+        
+        # Подтверждаем изменения
+        sdata.commit()
 # устанавливаем размеры экрана
 Width = 600
 Height = 600
@@ -65,9 +82,9 @@ def get_username_input():
                         if len(text) < 20:
                             text += event.unicode
 
-        screen.fill(RED)
-        title = font.render("your name", True, WHITE)
-        screen.blit(title, (Width//3 - title.get_width()//3, Height//2 - 100))
+        screen.fill(BLACK)
+        title = font.render("input your nic", True, WHITE)
+        screen.blit(title, (Width//2 - title.get_width()//2, Height//2 - 100))
 
         pygame.draw.rect(screen, color, input_box, 2)
         txt_surface = font.render(text, True, color)
@@ -78,21 +95,20 @@ def get_username_input():
     return text
 # цвета
 WHITE = (255, 255, 255)
-GRAY = (192,192,192)
+GRAY = (200, 200, 200)
 BLACK = (0, 0, 0)
-RED = (128, 0, 0)
-GREEN = (0,255,255)
-BLUE = (0, 0, 128)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
-ORANGE = (128,0,128)
+ORANGE = (255, 128, 0)
 CELL = 15  # размер клетки для рисования объектов игры
 DARGDRAY = (10, 10, 10)  # тёмный серый цвет
 score = 0  # начальный счёт
 level = 0  # начальный уровень
 speed = 5  # начальная скорость игры
 #шрифты
-font = pygame.font.Font('/Users/yeraliyeva/Desktop/Luminari.ttf',30)
-int_font = pygame.font.Font('/Users/yeraliyeva/Desktop/Luminari.ttf',30)
+font = pygame.font.SysFont("Arial",30)
 
 paused=False
 # рисования сетки
@@ -244,7 +260,7 @@ score=score_current(user_id)
 speed=speed_current(user_id)
 def welcome(username, level):
     screen.fill(BLACK)
-    msg = font.render(f" {username}!", True, WHITE)
+    msg = font.render(f"sup {username}!", True, WHITE)
     lvl = font.render(f"current level: {level}", True, WHITE)
     sc=font.render(f"current score: {score}", True, WHITE)
     screen.blit(msg, (Width // 2 - msg.get_width() // 2, Height // 2 - 50))
