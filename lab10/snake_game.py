@@ -7,9 +7,12 @@ pygame.init()
 sdata=psycopg2.connect(host="localhost", dbname="snake_db" , user="postgres" ,password="12345678" , port=5433)
 
 sdb=sdata.cursor()
+
+
+sdata.commit()
 def customer(username):
     sdb.execute("SELECT id FROM users WHERE username=%s", (username,))
-    user=sdb.fetchone()#возвращает одну строку результата последнего SQL-запроса.
+    user=sdb.fetchone()
     if user:
         return user[0]
     else:
@@ -31,10 +34,28 @@ def speed_current(user_id):
 def save_prog(user_id, level, score, speed):
     sdb.execute("INSERT INTO user_score (user_id, level, score, speed) VALUES (%s, %s, %s, %s)", (user_id, level, score, speed))
     sdata.commit()
-# устанавливаем размеры экрана
+def save_score(username, score):
+    
+       
+        sdb.execute("SELECT score FROM user_score WHERE name = %s", (username,))
+        result = sdb.fetchone()  
+
+        if result is None:
+            
+            sdb.execute("INSERT INTO user_score (name, score) VALUES (%s, %s)", (username, score))
+        else:
+            
+            current_score = result[0]  
+            if score > current_score:
+                
+                sdb.execute("UPDATE user_score SET score = %s WHERE name = %s", (score, username))
+        
+        
+        sdata.commit()
+
 Width = 600
 Height = 600
-screen = pygame.display.set_mode((Width, Height))  # устанавливаем окно игры с размерами 600x600
+screen = pygame.display.set_mode((Width, Height))  
 def get_username_input():
     input_box = pygame.Rect(Width//2 - 150, Height//2 - 30, 300, 50)
     color_inactive = pygame.Color('gray')
@@ -332,7 +353,7 @@ while running:
           
         time.sleep(3)
         pygame.quit() 
-        save_prog(users, level, score, speed)
+        save_prog(user_id, level, score, speed)
         print(f" уровень {level}, счёт {score}")
         sys.exit()
     snake.check_collision(food)
