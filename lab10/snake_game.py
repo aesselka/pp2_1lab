@@ -22,37 +22,42 @@ def customer(username):
 def level_current(user_id):
     sdb.execute("SELECT level FROM user_score WHERE user_id=%s ORDER BY timestamp DESC LIMIT 1", (user_id,))
     row=sdb.fetchone()
+    sdata.commit()
     return row[0] if row else 0
 def score_current(user_id):
     sdb.execute("SELECT score FROM user_score WHERE user_id=%s ORDER BY timestamp DESC LIMIT 1", (user_id,))
     row=sdb.fetchone()
+    sdata.commit()
     return row[0] if row else 0
 def speed_current(user_id):
     sdb.execute("SELECT speed FROM user_score WHERE user_id=%s ORDER BY timestamp DESC LIMIT 1", (user_id,))
     row=sdb.fetchone()
+    sdata.commit()
     return row[0] if row and row[0] is not None else 5
 def save_prog(user_id, level, score, speed):
     sdb.execute("INSERT INTO user_score (user_id, level, score, speed) VALUES (%s, %s, %s, %s)", (user_id, level, score, speed))
     sdata.commit()
 def save_score(username, score):
+    sdb.execute("SELECT score FROM user_score WHERE username = %s", (username,))
+    result = sdb.fetchone()
+
+    if result is None:
+        sdb.execute("INSERT INTO user_score (username, score) VALUES (%s, %s)", (username, score))
+    else:
+        current_score = result[0]
+        if score > current_score:
+            sdb.execute("UPDATE user_score SET score = %s WHERE username = %s", (score, username))
     
-       
-        sdb.execute("SELECT score FROM user_score WHERE name = %s", (username,))
-        result = sdb.fetchone()  
+    sdata.commit()
 
-        if result is None:
-            
-            sdb.execute("INSERT INTO user_score (name, score) VALUES (%s, %s)", (username, score))
-        else:
-            
-            current_score = result[0]  
-            if score > current_score:
-                
-                sdb.execute("UPDATE user_score SET score = %s WHERE name = %s", (score, username))
-        
-        
+def delete_scores_for_users(username):
+    # user_id=iinput("secified username: ")
+    sdb.execute("SELECT id FROM users WHERE username=%s",(username,))
+    user_id=sdb.fetchone()
+    if user_id:
+        user_id=user_id[0]
+        sdb.execute("DELETE FROM user_score WHERE user_id=%s",(user_id,) )
         sdata.commit()
-
 Width = 600
 Height = 600
 screen = pygame.display.set_mode((Width, Height))  
@@ -102,12 +107,16 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
-CELL = 15  # размер клетки для рисования объектов игры
-DARGDRAY = (10, 10, 10)  # тёмный серый цвет
-score = 0  # начальный счёт
-level = 0  # начальный уровень
-speed = 5  # начальная скорость игры
-#шрифты
+CELL = 20  
+DARGDRAY = (10, 10, 10)  
+score = 0 
+level = 0  
+speed = 5  
+
+snake_body_img = pygame.image.load('sn.jpg')
+snake_body_img = pygame.transform.scale(snake_body_img, (CELL, CELL))  
+
+
 font = pygame.font.SysFont("Arial",30)
 
 paused=False
@@ -122,60 +131,58 @@ def chess_grid():
     for i in range(Height // 2):
         for j in range(Width // 2):
             pygame.draw.rect(screen, colors[(i + j) % 2], (i * CELL, j * CELL, CELL, CELL))  # чередующиеся цвета
-#  отображения текста на экране (счёт и уровень)
+
 def draw_text():
-    score_text = font.render(f"Score: {score}  Level: {level}", True, WHITE)  # создаём текст с текущим счётом и уровнем
-    screen.blit(score_text, (10, 10))  # отображаем текст в левом верхнем углу
-#представляет точку на игровом поле с координатами (x, y)
+    score_text = font.render(f"Score: {score}  Level: {level}", True, WHITE)  
+    screen.blit(score_text, (10, 10))  
+
 class Point:
     def __init__(self, x, y):
-        self.x = x  # координата X
-        self.y = y  # координата Y
-    # def __str__(self):
-    #     return f"{self.x}, {self.y}"
+        self.x = x  
+        self.y = y 
 class Snake:
     def __init__(self):
         self.body = [Point(10, 11), Point(10, 12), Point(10, 13)]  # snake's body
-        self.dx = 1  # направление движения по оси X
-        self.dy = 0  # направление движения по оси Y
+        self.dx = 1  
+        self.dy = 0  
 
     def move(self):
-        for i in range(len(self.body) - 1, 0, -1):  # each segment moves to the place of the previous one
+        for i in range(len(self.body) - 1, 0, -1):  
             self.body[i].x = self.body[i - 1].x
             self.body[i].y = self.body[i - 1].y
-        self.body[0].x += self.dx  # двигаем голову змеи в направлении по X
-        self.body[0].y += self.dy  # двигаем голову змеи в направлении по Y
+        self.body[0].x += self.dx  
+        self.body[0].y += self.dy  
 
     def draw(self):
-        head = self.body[0] #голова
-        pygame.draw.rect(screen, RED, (head.x * CELL, head.y * CELL, CELL, CELL), 0, 5)  # head color
+        head = self.body[0] 
+        screen.blit(snake_body_img, (head.x * CELL, head.y * CELL))  # body color
+        # Отображаем тело змеи
         for segment in self.body[1:]:
-            pygame.draw.rect(screen, ORANGE, (segment.x * CELL, segment.y * CELL, CELL, CELL), 0, 5)  # body color
-
+            screen.blit(snake_body_img, (segment.x * CELL, segment.y * CELL))  # Рисуем тело с изображением
     def check_collision(self, food):
         global score, level, speed
         head = self.body[0]
-        if head.x == food.pos.x and head.y == food.pos.y:  # check if snake eats the food
-            score += food.points # увеличиваем счёт на количество очков, полученных за еду
-            score = max(score, 0) # Add food points to score
-            if food.color==RED: # если еда красная, уменьшаем уровень
-                if score // 10 < level: # Ensure score doesn't go below 0 # Decrease level based on score
+        if head.x == food.pos.x and head.y == food.pos.y:  
+            score += food.points 
+            score = max(score, 0) 
+            if food.color==RED: 
+                if score // 10 < level: 
                     level -= 1
                     print(level)
-                    screen.fill(RED) # экран красный, когда уровень снижается
+                    screen.fill(RED) 
                     pygame.draw.rect(screen, BLACK, (Width // 2 - 215, Height // 2 - 45 - 40, 450, 150), 0, 20)
                     pygame.draw.rect(screen, WHITE, (Width // 2 - 190, Height // 2 - 20 - 40, 400, 100), 0, 10)
-                    level_down = font.render("LEVEL DOWN!", True, (0, 0, 0)) # налпись о снижении уровня, когда уровень снижается
+                    level_down = font.render("LEVEL DOWN!", True, (0, 0, 0)) 
                     screen.blit(level_down, (Width // 2 - 110, Height // 2 - 30))
                     pygame.display.flip()
                     pygame.time.delay(500) 
-            self.body.append(Point(self.body[-1].x, self.body[-1].y))  # increase snake by 1 segment каждое яблоко
+            self.body.append(Point(self.body[-1].x, self.body[-1].y))  
             food.update_food(self)  # Update food with new random properties
 
-            if score // 10 > level:  # Если счёт больше уровня, повышаем уровень
+            if score // 10 > level:  
                 level += 1
                 speed += 2  # Увеличиваем скорость игры
-                # Green screen flash for 0.5 seconds
+                
                 screen.fill(GREEN)
                 pygame.draw.rect(screen, BLACK, (Width // 2 - 215, Height // 2 - 45 - 40, 450, 150), 0, 20)
                 pygame.draw.rect(screen, WHITE, (Width // 2 - 190, Height // 2 - 20 - 40, 400, 100), 0, 10)  # next level background
@@ -200,11 +207,11 @@ class Food:
     def __init__(self):
         self.pos = Point(0, 0)
         
-        self.points, self.color = self.random_food_properties()  # присваиваем случайные баллы и цвет еды
-        self.spawn_time = None  # обновляем время появления еды
-        self.spawn(None)  # генерируем первую еду
+        self.points, self.color = self.random_food_properties()  
+        self.spawn_time = None  
+        self.spawn(None)  
     def random_food_properties(self):
-        # генерация случайного цвета и баллов при каждом спавне еды
+
         food_type = random.choice(["green", "red", "yellow"])
         if food_type == "green":
             return 5, GREEN  # 5 points for green food
@@ -217,7 +224,7 @@ class Food:
         while True:
             new_x = random.randint(0, Width // CELL - 3)
             new_y = random.randint(0, Height // CELL - 3)
-            #  чтобы еда не спавнилась в том месте, где уже есть сегменты змеи
+         
             if snake and any(segment.x == new_x and segment.y == new_y for segment in snake.body):
                 
                 continue
@@ -226,28 +233,18 @@ class Food:
             break
 
     def draw(self):
-        # Отрисовка еды с текущим цветом
+     
         pygame.draw.rect(screen, self.color, (self.pos.x * CELL, self.pos.y * CELL, CELL, CELL), 0, 20)
     
     def update_food(self, snake):
-        # вызываться каждый раз, когда змейка съедает еду
-        self.points, self.color = self.random_food_properties()  # генерируем новый цвет и баллы для еды
-        self.spawn(snake)  # перегенерируем позицию еды
+ 
+        self.points, self.color = self.random_food_properties()  
+        self.spawn(snake)  
     
-        
-    # def chwck_expressionself(self):
-    #     if pygame.time.get_ticks() - self.spawn_time >5000:
-    #         print("serdar")
-    #         return True
-    #     return False
-
-
-
-
 clock = pygame.time.Clock()
 food = Food()
 snake = Snake()
-# управление направлением
+
 nup=False
 ndown=False
 nright=True
@@ -260,9 +257,9 @@ score=score_current(user_id)
 speed=speed_current(user_id)
 def welcome(username, level):
     screen.fill(BLACK)
-    msg = font.render(f"sup {username}!", True, WHITE)
-    lvl = font.render(f"current level: {level}", True, WHITE)
-    sc=font.render(f"current score: {score}", True, WHITE)
+    msg = font.render(f"username: {username}", True, WHITE)
+    lvl = font.render(f"cur level: {level}", True, WHITE)
+    sc=font.render(f"cur score: {score}", True, WHITE)
     screen.blit(msg, (Width // 2 - msg.get_width() // 2, Height // 2 - 50))
     screen.blit(lvl, (Width // 2 - lvl.get_width() // 2, Height // 2 + 10))
     screen.blit(sc, (Width // 2 - lvl.get_width() // 2, Height // 2 + 40))
@@ -280,22 +277,14 @@ while running:
                 if paused:
                     save_prog(user_id, level, score, speed)
                     print("paused")
-            # Обработка нажатий клавиш для управления движением змеи
-            if event.key == pygame.K_ESCAPE: # Выход из игры при нажатии ESC
-                running=False
-            # Проверяем, была ли нажата клавиша стрелка вправо и змея не движется влево
+            if event.key == pygame.K_ESCAPE:  # Выход из игры при нажатии ESC
+                running = False
             if event.key == pygame.K_RIGHT and not nleft:
-                #  флаг движения вправо , чтобы змея начала двигаться вправо
                 nright = True
-                #  скорость движения змеи по оси X на 1, чтобы она двигалась вправо
                 snake.dx = 1
-                #  флаг движения вверх в False, так как змея не будет двигаться вверх
                 nup = False
-                # флаг движения вниз в False, так как змея не будет двигаться вниз
                 ndown = False
-                #флаг движения влево в False, так как змея не может двигаться одновременно вправо и влево
                 nleft = False
-                # скорость движения змеи по оси Y на 0, так как она не будет двигаться по вертикали
                 snake.dy = 0
             elif event.key == pygame.K_LEFT and not nright:
                 nleft=True
@@ -331,23 +320,22 @@ while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     save_prog(user_id, level, score, speed)
+
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     paused = False
                     waiting = False
             clock.tick(10)
-    # Отображаем шахматную сетку
+ 
     chess_grid()
     snake.move()
    
-    # Проверка на столкновение с границей или с собой
+
     if snake.check_wall_collision() or snake.check_self_collision():
-        screen.fill(RED) # Экран красный при столкновении
-        pygame.draw.rect(screen,BLACK,(Width//2 -215,Height//2-45-40,450,150),0,20)
-        pygame.draw.rect(screen,WHITE,(Width//2 -190,Height//2-20-40,400,100),0,10)#fon vyveski you lose
-        
-        lose_text = font.render("YOU LOSE!", True, (0, 0, 0))#zagruzhaem text
+        screen.fill(WHITE) 
+
+        lose_text = font.render("lose", True, (0, 0, 0))
         screen.blit(lose_text, (Width//2 -110, Height//2-30))
         pygame.display.update()
           
@@ -355,25 +343,26 @@ while running:
         pygame.quit() 
         save_prog(user_id, level, score, speed)
         print(f" уровень {level}, счёт {score}")
+        username=input("specified username: ")
+        delete_scores_for_users(username)
         sys.exit()
     snake.check_collision(food)
-    # food.chwck_expressionself()
-    # Обновление еды, если она была съедена
-    if pygame.time.get_ticks() - food.spawn_time > 5000:  # Если еда на экране более 5 секунд, её обновляем
+
+    if pygame.time.get_ticks() - food.spawn_time > 5000:  
         food.update_food(snake)
 
-    # Отрисовка
+
     snake.draw()
     food.draw()
     draw_text()
 
-    # Обновляем экран
+
     pygame.display.flip()
 
-    # Устанавливаем скорость игры
     clock.tick(speed)
-
-pygame.quit()  # Завершаем игру
+# username=input("specified username: ")
+# delete_scores_for_users(username)
+pygame.quit()  
 sys.exit()
 sdata.close()
 sdb.close()

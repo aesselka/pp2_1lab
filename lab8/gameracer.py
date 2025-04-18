@@ -3,12 +3,14 @@ from pygame.locals import *
 import random
 
 pygame.init()
-
+# устанавливаем размеры экрана
 width, height = 600, 700
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Racer Game")
+# загружаем фон дороги
 road = pygame.image.load('road.jpg')
 racer_back = pygame.transform.scale(road, (width, height))
+
 fps = pygame.time.Clock()#chastota kadrov
 
 crash_music = pygame.mixer.Sound('crash.wav')
@@ -18,7 +20,7 @@ enemy_img = pygame.image.load('Enemy.png')
 player_img = pygame.image.load('Player.png')
 co_img = pygame.image.load('coin.png')
 coins_img=pygame.transform.scale(co_img ,(50,50))
-
+#начальные  значения скорости
 player_speed = 5
 enemy_speed = 6
 coin_speed = 3
@@ -30,11 +32,12 @@ class Coins(pygame.sprite.Sprite):
         super().__init__()
         self.image = coins_img#prisvaem monety
         self.rect = self.image.get_rect()
+        #случайное начальное позиция монеты 
         self.rect.center = (random.randint(100, 500),random.randint(-100,-20))#first position for moneta
 
     def move(self):
         self.rect.move_ip(0, coin_speed)#move moneta po y axis
-        if self.rect.top > height:
+        if self.rect.top > height: #сели монета выходит за пределы экрана снова в случайном позиции
             self.rect.center = (random.randint(100, 500), random.randint(-100,-20))
 #CLASS FOR ENEMY
 class Enemy(pygame.sprite.Sprite):
@@ -54,6 +57,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = player_img
         self.rect = self.image.get_rect()
+        #начальная позиция игрока
         self.rect.center = (160, 520)
 
     def move(self):
@@ -62,11 +66,12 @@ class Player(pygame.sprite.Sprite):
         #     self.rect.move_ip(0, -5)
         # if self.pressed_keys[K_DOWN]:
         #     self.rect.move_ip(0, 5)
+        #движение игрока влево и вправо
         if self.pressed_keys[K_LEFT] and self.rect.left>27:
             self.rect.move_ip(-5, 0)
         if self.pressed_keys[K_RIGHT] and self.rect.right<width-27:
             self.rect.move_ip(5, 0)
-
+#создаем обьяекты игрока,врага ии монет
 Player1 = Player()
 Enemy1 = Enemy()
 #group of sprite to make easy to uplavliyat
@@ -94,7 +99,7 @@ while True:
             enemy_speed += 1
             coin_speed += 1
             player_speed+=1
-
+    #движение обьектов
     Player1.move()
     Enemy1.move()
 
@@ -122,17 +127,17 @@ while True:
 
 
     coins_num += len(collected_coins) #uvelichivaem schet
-
+#если собрали доставточное количество монет выводим победу
     if coins_num >= target_coins:
         screen.blit(win_img, (50,150))
         pygame.display.update()
         pygame.time.delay(2000)
         pygame.quit()
         sys.exit()
-
+#отрисовываем все обьекты на экране 
     screen.fill((0, 0, 0))  
     screen.blit(racer_back, (0, 0))  
     all_sprites.draw(screen) 
 
     pygame.display.update()
-    fps.tick(60) 
+    fps.tick(60) #ограничиваем кол кадров в секунду

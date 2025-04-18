@@ -82,7 +82,7 @@ def delete_user():
         print("delete")
     elif choice=="2":
         phonee=input("write number: ")
-        cur.execute("DELETE FROM phonbook WHERE phone=%s",(phonee,))
+        cur.execute("DELETE FROM phonebook WHERE phone=%s",(phonee,))
         conn.commit()
         print("delete")
 

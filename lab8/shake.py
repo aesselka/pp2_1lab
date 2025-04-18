@@ -8,8 +8,13 @@ WIDTH, HEIGHT = 600, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Shake Game")
 clock = pygame.time.Clock()
+
 wi_img = pygame.image.load('win.jpg')
 win_img=pygame.transform.scale( wi_img , (500,400))
+
+block=pygame.image.load('square.png')
+block_img=pygame.transform.scale(block ,(20,20))
+
 speed = 5 
 block_size = 20
 GREEN = (0, 255, 0)
@@ -19,11 +24,11 @@ WHITE = (255, 255, 255)
 score = 0
 target_wins=30
 font_style = pygame.font.SysFont("Times New Roman", 25)
-
+# функция для отображения сообщений 
 def message(msg, color, x0, y0):
     mesg = font_style.render(msg, True, color)
     screen.blit(mesg, [x0, y0])
-
+# основная игровая логика
 def gameloop():
     game_over = False
     game_close = False
@@ -43,9 +48,9 @@ def gameloop():
     score = 0
 
     while not game_over:
-        while game_close:
+        while game_close: #если змейка столкнулась с собой или стенкой
             screen.fill(BLACK)
-            message("lost", RED, WIDTH / 5, HEIGHT / 4)
+            message("lost", RED, WIDTH / 5, HEIGHT / 4) # сообщение о поражении
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -53,16 +58,17 @@ def gameloop():
                     game_over = True
                     game_close = False
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
+                    if event.key == pygame.K_q: # нажал q -выходим
                         game_over = True
                         game_close = False
-                    if event.key == pygame.K_c:
+                    if event.key == pygame.K_c: #нажал с -начинаем заново
                         gameloop()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
+                # управление змейкой с помощью стрелок
                 if event.key == pygame.K_LEFT and x_speed == 0:  
                     x_speed = -block_size
                     y_speed = 0
@@ -94,6 +100,8 @@ def gameloop():
 
         # draw snake
         head = []
+
+
         head.append(x)
         head.append(y)
         snake_list.append(head)
@@ -107,7 +115,8 @@ def gameloop():
 
         # draw all segments of snake
         for block in snake_list:
-            pygame.draw.rect(screen, GREEN, [block[0], block[1], block_size, block_size])
+            # pygame.draw.image(screen, block_img, [block[0], block[1]])
+            screen.blit(block_img, [block[0], block[1]])
 
         # check eating food
         if x == foodx and y == foody:
@@ -121,10 +130,11 @@ def gameloop():
         pygame.display.update()
         clock.tick(speed)
 
+        #проверка на победу
         if score >= target_wins:
-            screen.blit(win_img, (50,150))
+            screen.blit(win_img, (50,150))#показываем картинку победы
             pygame.display.update()
-            pygame.time.delay(2000)
+            pygame.time.delay(2000) # зардержка на 2 секунды
     pygame.quit()
     quit()
 gameloop()

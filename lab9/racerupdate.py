@@ -24,6 +24,7 @@ silver_img=pygame.transform.scale(silv_img, (50,50))
 bron_img=pygame.image.load('brcoin.png')
 bronze_img=pygame.transform.scale(bron_img, (50,50))
 
+
 WHITE=(255,255,255)
 player_speed = 5
 enemy_speed = 6
@@ -32,6 +33,7 @@ coins_num = 0
 target_coins =30
 font_style = pygame.font.SysFont("Times New Roman", 25)
 
+# функция для отображения сообщений
 def message(msg, color, x0, y0):
     mesg = font_style.render(msg, True, color)
     screen.blit(mesg, [x0, y0])
@@ -47,11 +49,12 @@ class Coins(pygame.sprite.Sprite):
         if coin_type=="bronze":
             self.image=bronze_img
         self.rect=self.image.get_rect()
+        # начальная позиция монеты
         self.rect.center=(random.randint(100,500),random.randint(-100,-20))
 
     def move(self):
-        self.rect.move_ip(0,coin_speed)
-        if self.rect.top>height:
+        self.rect.move_ip(0,coin_speed) # монета двигается вниз
+        if self.rect.top>height: # если монета выходит за экран, она удаляется
             self.kill()
 
 #CLASS FOR ENEMY
@@ -63,8 +66,8 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.center = (random.randint(40, width - 40), 0)
 
     def move(self):
-        self.rect.move_ip(0, enemy_speed)
-        if self.rect.top > height:
+        self.rect.move_ip(0, enemy_speed) # враг двигается вниз
+        if self.rect.top > height: # если враг выходит за экран, он появляется снова сверху
             self.rect.center = (random.randint(100, 500), -20)
 #class for player
 class Player(pygame.sprite.Sprite):
@@ -72,10 +75,10 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = player_img
         self.rect = self.image.get_rect()
-        self.rect.center = (160, 520)
+        self.rect.center = (160, 520) # начальная позиция игрока
 
     def move(self):
-        self.pressed_keys = pygame.key.get_pressed()
+        self.pressed_keys = pygame.key.get_pressed() # проверяем нажатые клавиши
         # if self.pressed_keys[K_UP]:
         #     self.rect.move_ip(0, -5)
         # if self.pressed_keys[K_DOWN]:
@@ -84,7 +87,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.move_ip(-5, 0)
         if self.pressed_keys[K_RIGHT] and self.rect.right<width-27:
             self.rect.move_ip(5, 0)
-
+# создаем объекты игрока врага и монет
 Player1 = Player()
 Enemy1 = Enemy()
 #group of sprite to make easy to uplavliyat
@@ -109,40 +112,40 @@ while True:
             enemy_speed += 1
             coin_speed += 1
             player_speed+=1
-
+#движение
     Player1.move()
     Enemy1.move()
 
     # genearcia monet s sluchainym vyborom
     if random.randint(0, 100) < 2:  # posibilities of monet
-        coin = Coins()
+        coin = Coins() # создаем монету
         coins.add(coin)
         all_sprites.add(coin)
 
     for coin in coins:
-        coin.move()
+        coin.move() # двигаем монеты
 #check stolknovenya player with enemy
     if pygame.sprite.collide_rect(Player1, Enemy1):
-        crash_music.play()
+        crash_music.play() # воспроизводим звук столкновения
         font = pygame.font.SysFont(None, 75)
-        screen.fill((255,255,255))
-        text = font.render("Game Over!", True, (255, 0, 0))
+        screen.fill((255,255,255)) # экран заполняется белым цветом
+        text = font.render("Game Over!", True, (255, 0, 0)) # выводим текст "Game Over!"
         screen.blit(text, ((width // 3)-50, (height // 3)+50))
         pygame.display.update()
-        pygame.time.delay(2000)
+        pygame.time.delay(2000) # задержка 2 секунды 
         pygame.quit()
         sys.exit()
 
 #proverka sbora monet
     collected_coins = pygame.sprite.spritecollide(Player1, coins, True)
     if collected_coins:
-        new_coin=Coins()
+        new_coin=Coins() # создаем новую монету
         coins.add(new_coin)
         all_sprites.add(new_coin)
 
 
     coins_num += len(collected_coins) #uvelichivaem schet
-
+# если собрали нужное количество монет, выводим экран победы
     if coins_num >= target_coins:
         screen.blit(win_img, (50,150))
         pygame.display.update()
@@ -153,7 +156,7 @@ while True:
     # message("Score: " + str(coins_num), WHITE, 30, 10)
     # pygame.display.update()
     # fps.tick(100)
-
+    # отрисовываем экран
     screen.fill((0, 0, 0))  
     screen.blit(racer_back, (0, 0))  
     all_sprites.draw(screen) 

@@ -28,11 +28,5 @@ try:
     pygame.mixer.music.play(0)
 except pygame.error as e:
     print("Ошибка загрузки музыки ")
-# done= False
-# while not done:
-#     for event in pygame.event.get():
-#         if event.type==pygame.QUIT:
-#             done= True
 
-#     pygame.display.flip()
 
